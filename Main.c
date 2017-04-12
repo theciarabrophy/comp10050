@@ -22,9 +22,15 @@ int strength;
 int magicskills;
 int luck;
 int dexterity;
+int status;
+struct slots *playerposition;
 }slots2;
+void createBoard( struct slots **upLeft, struct slots **upRight, struct slots **downLeft, struct slots **downRight);//creates the 7*7 board using the linked list
+struct slots2 * assignplayer(int input, struct slots2 *players);//function to assign the names, type, and all the capabilities to each player
+struct slots2 * move(struct slots2 *players2); //function to enable the player to move up,right,left, or down.
 int main()
 { 
+	struct slots2 *player3;
 	int row, column;
 	struct slots *currSlot = NULL;
 	struct slots *foundSlots;
@@ -39,49 +45,50 @@ int main()
 	//pointer to slots(boardSize - 1, boardSize -1)
 	struct slots *downRight;
 	createBoard(&upLeft, &upRight, &downLeft, &downRight);
-	getDesiredElement(7, &row,&column);
-	if(row >= 7/2)
+	printf("Enter the number of players:\n");
+	int x=0;
+	scanf("%d",&x);
+	while (x <2 || x > 6)
 	{
-		if(column >= 7/2)
-			{
-				currSlot = reachDesiredElement(row,column,downRight);
-			}
-		else
+   		printf("Input is invaid, please input  number of players 2-6\n");
+   		scanf ("%d", &x);
+    }
+	struct slots2 *players= assignplayer(x, &player3);
+	for(int i=0;i<x;i++)
+	{
+		players[i].status=1;
+	}
+	
+	int option=0; int counter=0;
+	do
+	{
+		counter=0;
+		for(int j=0;j<x;j++)
 		{
-			currSlot = reachDesiredElement(row,column,downLeft);
-		}
-	}
-	else
-	{
-		if(column >= 7/2)
+			if(players[j].status==1)
 			{
-				currSlot = reachDesiredElement(row,column, upRight);
+				counter++;
 			}
-		else 
-			{
-				currSlot = reachDesiredElement(row,column,upLeft);
-			}
-	}
-	for(int i=0; i<7; i++){
-		for(int j=0; j<7;j++){
-			explored[i][j] = false;
 		}
-	}
-
-	foundSlots = malloc(7*7*sizeof(struct slots));
-	printf("\n\nFunction findSlotsinvoked:\n");
-
-	if(currSlot!= NULL)
-	{
-		//invokes function findSlots. The required distance is a constant
-		//However you can reuse this function providing as input any arbitrary distance
-		findSlots(3, 0, currSlot, foundSlots, &count, explored);
-		for(int i=0; i<count; i++)
+		for(int i=0;i<x;i++)
 		{
-			printf("(%d, %d)-> ",foundSlots[i].row, foundSlots[i].column);
+			if(players[i].status==1)
+			{
+				printf("Player %d Enter 1 to move or 2 to attack, 0 to exit:\n",i+1);
+				scanf("%d",&option);
+				if(option==1)
+				{
+					move(&players[i]);
+				}
+				if(option==0)
+				{
+					players[i].status=0;
+				}
+			}
 		}
-	}
-
+	} while(counter>1);
+				
+		
 	return 0;
 }
 void createBoard( struct slots **upLeft, struct slots **upRight, struct slots **downLeft, struct slots **downRight)
@@ -199,25 +206,19 @@ void createBoard( struct slots **upLeft, struct slots **upRight, struct slots **
 	*downLeft = &board[6][0];
 	//assigns pointer of pointer to slotsat position (boardSize -1, boardSize -1)
 	*downRight = &board[6][6];
-	assignplayer(&board);
 }
-void assignplayer(struct slots ***board)
+struct slots2 * assignplayer(int input, struct slots2 *players)
 {
-	int input=0;
-	printf("Please input  number of players 2-6\n"); // asking the user to input a set of players (max 6). 
-   	scanf ("%d", &input);
-   	while (input <2 || input > 6)
-	{
-   		printf("Input is invaid, Please input  number of players 2-6\n");
-   		scanf ("%d", &input);
-    }	
-    struct slots2 *players = malloc(input * sizeof(struct slots2));
+     players=malloc(input*sizeof(struct slots2));
+    
     for(int i=0;i<input;i++)
-    { 
+    {   
     	printf("Please input name and type for player %d\n", i+1);
-		scanf("%s%s", &players[i].name,&players[i].type);
+		scanf("%s%s", players[i].name,players[i].type);
+		printf("Hello");
 		if(players[i].type[0]=='O' || players[i].type[0]=='o') //checking for the type of the player, and accordingly assigning values
 		{
+			players[i].life=100;
 			players[i].magicskills=0;
 			players[i].smartness=rand()%20;
 			players[i].luck=rand()%(50-players[i].smartness);
@@ -226,6 +227,7 @@ void assignplayer(struct slots ***board)
 		}
 		if(players[i].type[0]=='H' || players[i].type[0]=='h') //checking for the type of the player, and accordingly assigning values
 		{   do {
+			players[i].life=100;
 			players[i].magicskills=rand()%300;
 			players[i].smartness=rand()%(300-players[i].magicskills);
 			players[i].luck=rand()%(300-(players[i].magicskills+players[i].smartness));
@@ -236,6 +238,7 @@ void assignplayer(struct slots ***board)
 		}
 		if(players[i].type[0]=='E' || players[i].type[0]=='e') //checking for the type of the player, and accordingly assigning values
 		{
+			players[i].life=100;
 			players[i].magicskills=rand()%(80+1-50)+50;
 			players[i].smartness=rand()%(100+1-70)+70;
 			players[i].luck=rand()%(100+1-60)+60;
@@ -244,6 +247,7 @@ void assignplayer(struct slots ***board)
 		}
 		if(players[i].type[0]=='W' || players[i].type[0]=='w') //checking for the type of the player, and accordingly assigning values
 		{
+			players[i].life=100;
 			players[i].magicskills=rand()%(100+1-80)+80;
 			players[i].smartness=rand()%(100+1-90)+90;
 			players[i].luck=rand()%(100+1-50)+50;
@@ -251,114 +255,15 @@ void assignplayer(struct slots ***board)
 			players[i].dexterity=rand()%100;
 		}
    		int r=rand()%7; int c=rand()%7;
-   		players[i].rowvalue=r;
-   		players[i].columnvalue=c;
+   		players[i].playerposition->row=r;
+   		players[i].playerposition->column=c;
    	}
-   	
+   	return players;
    }
-   void getDesiredElement(int boardSize, int *row, int *col)
+struct slots2 * move(struct slots2 *players2)
 {
-	printf("Please enter the column and the Row of the desired slot \n");
-	printf("Note that size of the board is %d\n", boardSize);
-
-		//it will cycle asking the user to insert the row
-		//until the value of the desired row is >= 0 or < of the
-		// size of the board
-		do {
-			printf("Row: ");
-			scanf("%d", row);
-			printf("%d\n", *row);
-			if(row < 0 && *row >= boardSize)
-				printf("Error: Incorrect row dimension\n");
-		} while(*row<0 && *row>=boardSize);
-
-		//it will cycle asking the user to insert the column
-		//until the value of the desired row is >= 0 or < of the
-		// size of the board
-		do {
-			printf("Column: ");
-			scanf("%d", col);
-			printf("%d\n", *col);
-			if(*col<0 && *col>=boardSize)
-				printf("Error: Incorrect column dimension\n");
-		} while(*col<0 && *col>=boardSize);
-}
-  struct slots* reachDesiredElement(int row, int column, struct slots *initialSlot)
-  {
-
-	bool found = false;
-	//current slot
-	struct slots *currentSlot = initialSlot;
-
-	printf("\nFunction reachDesiredElement invoked\n");
-
-	//prints the column and the row of the initial slotsfrom which the search starts
-	printf("Initial slots(%d, %d) -> \n",initialSlot->row,initialSlot->column);
-
-
-	//while the slotsis not found
-	while(found==false)
-	{
-
-
-		//if the row of the current slotsis > of the row of the desired slot,
-		//we move up
-		if(currentSlot->row > row)
-		{
-			//the current slotsnow points to the slotsone row up
-			currentSlot = currentSlot->up;
-			//prints the column and the row of the current slot
-			printf("Current slots(%d, %d) -> \n",currentSlot->row,currentSlot->column);
-		}
-		//if the row of the current slotsis < of the row of the desired slot,
-		//we move down
-		if(currentSlot->row < row)
-		{
-			//the current slotsnow points to the slotsone row down
-			currentSlot = currentSlot->down;
-			//prints the row and the column of the current slot
-			printf("Current slots(%d, %d) -> \n",currentSlot->row,currentSlot->column);
-
-		}
-		//if the column of the current slotsis > of the column of the desired slot,
-		//we move left
-		if(currentSlot->column > column)
-		{
-
-			//the current slotsnow points to the slotsone column left
-			currentSlot = currentSlot->left;
-			//prints the row and the column of the current slot
-			printf("Current slots(%d, %d) -> \n",currentSlot->row,currentSlot->column);
-		}
-
-		//if the column of the current slotsis < of the column of the desired slot,
-		//we move right
-		if(currentSlot->column < column)
-		{
-
-			//the current slotsnow points to the slotsone column right
-			currentSlot = currentSlot->right;
-			//prints the row and the column of the current slot
-			printf("Current slots(%d, %d) -> \n",currentSlot->row,currentSlot->column);
-
-		}
-		//if the current slotsis at a column and a row equal to the desired column and row, respectively
-		// we found the slot
-		if(currentSlot->column == column && currentSlot->row == row){
-			printf("Found\n");
-			found = true;
-
-		}
-
-	}
-	//returns the found slot
-	move(&currentSlot);
-	return currentSlot;
-}
-void currentSlot(*current)
-{   
 	int opt=0;
-	if(current->up==NULL && current->left==NULL && current->right!=NULL && current->down!=NULL)
+	if(players2->playerposition->up==NULL && players2->playerposition->left==NULL && players2->playerposition->right!=NULL && players2->playerposition->down!=NULL)
 	{
 		printf("Enter 1 to move right, 4 to move down:\n");
 		scanf("%d",&opt);
@@ -370,15 +275,15 @@ void currentSlot(*current)
 		{
 			if(opt==1)
 			{
-				current=current->right;
+				players2->playerposition=players2->playerposition->right;
 			}
 			if(opt==4)
 			{
-				current=current->down;
+				players2->playerposition=players2->playerposition->down;
 			}
 		}
 	}
-	if(current->up==NULL && current->right==NULL && current->left!=NULL && current->down!=NULL)
+	if(players2->playerposition->up==NULL && players2->playerposition->right==NULL && players2->playerposition->left!=NULL && players2->playerposition->down!=NULL)
 	{
 		printf("Enter 3 to move left, 4 to move down:\n");
 		scanf("%d",&opt);
@@ -390,15 +295,15 @@ void currentSlot(*current)
 		{
 			if(opt==3)
 			{
-				current=current->left;
+				players2->playerposition=players2->playerposition->left;
 			}
 			if(opt==4)
 			{
-				current=current->down;
+				players2->playerposition=players2->playerposition->down;
 			}
 		}
 	}
-	if(current->up!=NULL && current->right==NULL && current->left!=NULL && current->down==NULL)
+	if(players2->playerposition->up!=NULL && players2->playerposition->right==NULL && players2->playerposition->left!=NULL && players2->playerposition->down==NULL)
 	{
 		printf("Enter 3 to move left, 2 to move up:\n");
 		scanf("%d",&opt);
@@ -410,15 +315,15 @@ void currentSlot(*current)
 		{
 			if(opt==3)
 			{
-				current=current->left;
+				players2->playerposition=players2->playerposition->left;
 			}
 			if(opt==2)
 			{
-				current=current->up;
+				players2->playerposition=players2->playerposition->up;
 			}
 		}
 	}
-	if(current->up!=NULL && current->right!=NULL && current->left==NULL && current->down==NULL)
+	if(players2->playerposition->up!=NULL && players2->playerposition->right!=NULL && players2->playerposition->left==NULL && players2->playerposition->down==NULL)
 	{
 		printf("Enter 1 to move right, 2 to move up:\n");
 		scanf("%d",&opt);
@@ -430,15 +335,15 @@ void currentSlot(*current)
 		{
 			if(opt==1)
 			{
-				current=current->right;
+				players2->playerposition=players2->playerposition->right;
 			}
 			if(opt==2)
 			{
-				current=current->up;
+				players2->playerposition=players2->playerposition->up;
 			}
 		}
 	}
-	if(current->up==NULL && current->right!=NULL && current->left!=NULL && current->down!=NULL)
+	if(players2->playerposition->up==NULL && players2->playerposition->right!=NULL && players2->playerposition->left!=NULL && players2->playerposition->down!=NULL)
 	{
 		printf("Enter 3 to move left, 1 to move right, 4 to move down:\n");
 		scanf("%d",&opt);
@@ -450,19 +355,19 @@ void currentSlot(*current)
 		{
 			if(opt==3)
 			{
-				current=current->left;
+				players2->playerposition=players2->playerposition->left;
 			}
 			if(opt==4)
 			{
-				current=current->down;
+				players2->playerposition=players2->playerposition->down;
 			}
 			if(opt==1)
 			{
-				current=current->right;
+				players2->playerposition=players2->playerposition->right;
 			}
 		}
 	}
-	if(current->up!=NULL && current->right==NULL && current->left!=NULL && current->down!=NULL)
+	if(players2->playerposition->up!=NULL && players2->playerposition->right==NULL && players2->playerposition->left!=NULL && players2->playerposition->down!=NULL)
 	{
 		printf("Enter 3 to move left, 2 to move up, 4 to move down:\n");
 		scanf("%d",&opt);
@@ -474,19 +379,19 @@ void currentSlot(*current)
 		{
 			if(opt==3)
 			{
-				current=current->left;
+				players2->playerposition=players2->playerposition->left;
 			}
 			if(opt==4)
 			{
-				current=current->down;
+				players2->playerposition=players2->playerposition->down;
 			}
 			if(opt==2)
 			{
-				current=current->up;
+				players2->playerposition=players2->playerposition->up;
 			}
 		}
 	}
-	if(current->up!=NULL && current->right!=NULL && current->left!=NULL && current->down==NULL)
+	if(players2->playerposition->up!=NULL && players2->playerposition->right!=NULL && players2->playerposition->left!=NULL && players2->playerposition->down==NULL)
 	{
 		printf("Enter 3 to move left, 1 to move right, 2 to move up:\n");
 		scanf("%d",&opt);
@@ -498,19 +403,19 @@ void currentSlot(*current)
 		{
 			if(opt==3)
 			{
-				current=current->left;
+				players2->playerposition=players2->playerposition->left;
 			}
 			if(opt==2)
 			{
-				current=current->up;
+				players2->playerposition=players2->playerposition->up;
 			}
 			if(opt==1)
 			{
-				current=current->right;
+				players2->playerposition=players2->playerposition->right;
 			}
 		}
 	}
-	if(current->up!=NULL && current->right!=NULL && current->left==NULL && current->down!=NULL)
+	if(players2->playerposition->up!=NULL && players2->playerposition->right!=NULL && players2->playerposition->left==NULL && players2->playerposition->down!=NULL)
 	{
 		printf("Enter 4 to move down, 1 to move right, 2 to move up:\n");
 		scanf("%d",&opt);
@@ -522,19 +427,19 @@ void currentSlot(*current)
 		{
 			if(opt==4)
 			{
-				current=current->down;
+				players2->playerposition=players2->playerposition->down;
 			}
 			if(opt==2)
 			{
-				current=current->up;
+				players2->playerposition=players2->playerposition->up;
 			}
 			if(opt==1)
 			{
-				current=current->right;
+				players2->playerposition=players2->playerposition->right;
 			}
 		}
 	}
-	if(current->up!=NULL && current->right!=NULL && current->left!=NULL && current->down!=NULL)
+	if(players2->playerposition->up!=NULL && players2->playerposition->right!=NULL && players2->playerposition->left!=NULL && players2->playerposition->down!=NULL)
 	{
 		printf("Enter 4 to move down, 1 to move right, 2 to move up, 3 to move left:\n");
 		scanf("%d",&opt);
@@ -546,22 +451,24 @@ void currentSlot(*current)
 		{
 			if(opt==4)
 			{
-				current=current->down;
+				players2->playerposition=players2->playerposition->down;
 			}
 			if(opt==2)
 			{
-				current=current->up;
+				players2->playerposition=players2->playerposition->up;
 			}
 			if(opt==1)
 			{
-				current=current->right;
+				players2->playerposition=players2->playerposition->right;
 			}
 			if(opt==3)
 			{
-				current=current->left;
+				players2->playerposition=players2->playerposition->left;
 			}
 		}
 	}
+	return 0;
+}
 		
 	   
 
