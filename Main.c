@@ -97,14 +97,11 @@ void createBoard(int n) {
         for (int i = 1; i < n; i++) 
         {
             Slot *next = malloc(sizeof (Slot));
-            Slot *previous = malloc(sizeof (Slot));
+            next->left = currDown;
             currDown->right = next;
             currDown->up = currUp;
             currUp->down = currDown;
-            if(i>1)
-            {
-            	currDown->left=previous;
-            }
+            
             currUp = currUp->right;
             currDown = currDown->right;
         }
