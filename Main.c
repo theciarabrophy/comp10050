@@ -43,7 +43,6 @@ struct Player *_players;
 const int N = 7;
 
 int main() {
-    srand(time(NULL));
     createBoard(N);
     printf("Enter the number of players:\n");
     int noOfPlayers = 0;
@@ -134,7 +133,7 @@ void createBoard(int n) {
 }
 
 void assignPlayer(int noOfPlayers) 
-{
+{   srand(time(NULL));
     _players = malloc(noOfPlayers * sizeof (Player));
     Player *players = _players;
     for (int i = 0; i < noOfPlayers; i++) 
