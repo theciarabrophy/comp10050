@@ -211,6 +211,10 @@ void assignPlayer(int noOfPlayers)
 						move(&players[i]);
 					             
 					}
+					if (option == 2)
+					{
+						attack(&players[i]);
+					}
                 	if (option == 0)
                 	{
                    		 players[i].status = 0;
@@ -898,6 +902,281 @@ void move(struct Player *players2)
     printfunction(*players2); return;
     } 
 }
+
+void attack (struct Player *players2)
+{
+	else if ( opt == 2) 
+	{
+		puts("Press enter to continue: \n"); //needed for the clearInputBuffer() call
+		struct boardPiece *curr = &map[players[r].rowNumber][players[r].columnNumber]; //the current slot that the player is in
+		struct boardPiece *foundSlots; //array of foundslots
+		bool explored[rValue][cValue]; //array of explored slots
+		int count = 0; //variable used to determine the size of foundSlots array
+		int reqDist; //the distance of the attack
+		struct PLAYER_ATTRIBUTES Players[numPlayers]; //array of players
+		bool actionPossible = false; //if the attack is possible
+		struct PLAYER_ATTRIBUTES target; //the player that the user wants to target
+
+
+		for (int br = 0; br < rValue; br++)
+		{
+			for (int bc = 0; bc < cValue; bc++)
+			{
+				explored[br][bc] = false;
+			}
+		}
+
+		clearInputBuffer();
+		do 
+		{ //player inputs type of attack they want to do
+			printf("Please Input the type of attack: \nNear Attack: 'n' \nDistant Attack: 'd'\nMagic Attack: 'm'\nInput: ");
+			scanf("%c",&attackType);
+		}
+		while((attackType != 'n') && (attackType != 'd') && (attackType != 'm'));
+
+		if (attackType == 'n')
+		{ //if the player wants to do a near attack:
+			/* Finding slots that are able to be attacked */
+			reqDist = 1;
+			foundSlots = malloc(5 * sizeof(struct boardPiece));
+			findSlots(reqDist,0,currentSlot, foundSlots, &count, explored);
+			/* Selecting those slots, and determing if there are any people in it */
+			int index = 0;
+			clearInputBuffer();
+			for (int i = 0; i < numPlayers; i++)
+			{
+				if (players[i].lifePoints > 0)
+				{
+					for (int z = 0; z < count; z++)
+					{
+						if((strcmp(players[r].name, players[i].name) != 0))
+						{
+							if((players[i].rowNumber == foundSlots[z].row) && (players[i].columnNumber == foundSlots[z].column))
+							{
+								actionPossible = true;
+								Players[index] = players[i];
+								index++;
+							}
+						}
+					}
+				}
+			}
+		
+		if (actionPossible == true)
+		{ //if the action is possible
+			int target;
+			printf("Players that can be attacked: \n");
+			for(int p = 0; p < (index); p++)
+			{//player selects the opponent that they want to attack
+				printf("Name: %s | Health: %lf | Input: %d to attack",Players[p].name, Players[p].lifePoints, p);	
+				puts("");
+			}	
+			
+			printf("Input: ");
+			scanf("%d",&target);
+
+			target = Players[target];
+
+			double damage;
+			if(target.strength <= 70)
+			{
+				damage = ((0.5) * players[r].strength);
+				target.lifePoints = target.lifePoints - damage;
+				printf("\n\nYou have just done %lf damage!\n\n",damage);
+			}
+			else {
+					damage = ((0.3)* targetPlayer.strength);
+					players[r].lifePoints = players[r].lifePoints - damage;
+					printf("\n\nYou have just taken %lf damage!\n\n\n",damage);
+				}
+	
+			for (int i = 0; i < numPlayers; i++)
+			{
+				if(strcmp(players[r].name, players[i].name) != 0)
+				{ //finds the targer player in the players array, and sets it equal to targetPlayer
+					if((players[i].rowNumber == target.rowNumber) && (players[i].columnNumber == target.columnNumber) && (strcmp(target.name, players[i].name) == 0))
+					{
+						players[i] = targetPlayer;
+					}
+				}
+			}
+			
+			if (players[r].lifePoints == 0)
+			{ //if the attacker has been killed
+				printf("\n\n%s has been killed and has been removed from the game!\n\n",players[r].name);
+			}
+			else if (target.lifePoints == 0)
+			{ //if the target has been killed
+				printf("\n\n%s has been killed and has been removed from the game!\n\n",target.name);
+			}
+		}
+		
+		else{ //if the attack is not possible
+				printf("This attack cannot be made!, there are no players in an adjacent slot to you!\n");
+			}
+		}
+		
+		else if (attackType == 'd')
+		{ //if the player wants to do a distant attack
+			foundSlots = malloc(32 * sizeof(struct boardPiece)); //the number of possible slots tha a distant attack can make
+			printf("You are about to make a distant attack, how far would you like to pull your bow?\nInput a number from 2-4: ");
+			scanf("%d",&reqDist);
+
+			while((reqDist < 2) || (reqDist > 4))
+			{ //inputs a number for the ditstant attack
+				clearInputBuffer();
+				printf("Input a number form 2-4: ");
+				scanf("%d",&reqDist);
+				printf("\n");					
+			}
+
+			findSlots(reqDist,0,curr, foundSlots, &count, explored);
+
+			int index = 0;
+			clearInputBuffer();
+			for (int i = 0; i < numPlayers; i++)
+			{
+				if (players[i].lifePoints > 0)
+				{
+					for (int z = 0; z < count; z++)
+					{
+						if((strcmp(players[r].name, players[i].name) != 0))
+						{
+							if((players[i].rowNumber == foundSlots[z].row) && (players[i].columnNumber == foundSlots[z].column))
+							{
+								actionPossible = true;
+								playerArray[index] = players[i];
+								index++;
+							}
+						}
+					}
+				}
+			}
+			
+			if (actionPossible == true)
+			{ //if the action is possible
+				int target;
+
+				printf("Players that can be attacked: \n"); //lists the players that can be attacked
+				for(int p = 0; p < (index); p++)
+				{
+					printf("Name: %s | Health: %lf | Input: %d to attack",playerArray[p].name, playerArray[p].lifePoints, p);
+					puts("");
+				}
+						
+				printf("Input: ");
+				scanf("%d",&target);
+
+				target= Players[target];
+				double damage;
+				if (target.dexterity >= players[r].dexterity)
+				{ //if the targetPlayer was able to dodge the arrow
+					printf("\n\n%s was able to dodge your arrow!\n\n",target.name);
+				}
+				else 
+				{ //if the targetPlayer was hit by the arrow
+					damage = ((0.3)* target.strength);
+					target.lifePoints = target.lifePoints - damage;
+					printf("\n\nYou have just done %lf damage!\n\n",damage);
+				}
+				for (int i = 0; i < numPlayers; i++)
+				{
+					if(strcmp(players[r].name, players[i].name) != 0)
+					{
+						if((players[i].rowNumber == target.rowNumber) && (players[i].columnNumber == target.columnNumber) && (strcmp(target.name, players[i].name) == 0))
+						{
+							players[i] = targetPlayer;
+						}
+					}
+				}
+			}
+					
+			else 
+			{ //if the attack is not possible
+				printf("\n\nDistant attack at %d range is not possible!\n\n",reqDist);
+			}
+			if (players[r].lifePoints == 0)
+			{
+				printf("\n\n%s has been killed and has been removed from the game!\n\n",players[r].name);
+			}
+			else if (target.lifePoints == 0)
+			{
+				printf("\n\n%s has been killed and has been removed from the game!\n\n",target.name);
+			}
+		}
+		else 
+		{ //if the player wants to do a magic attack
+			int index = 0;
+			if (players[r].intelligence + players[r].magic > 150)
+			{ //if the player has the skill required to do a magic attack
+				for (int i = 0; i < numPlayers; i++)
+				{ //loops through the player array
+					if (players[i].lifePoints > 0)
+					{
+						if((strcmp(players[r].name, players[i].name) != 0) && (players[i].lifePoints > 0))
+						{
+							actionPossible = true;
+							playerArray[index] = players[i];
+							index++;
+						}
+					}
+				}
+				
+				if (actionPossible == true)
+				{ //if the action was possoble
+					int target;
+
+					printf("Players that can be attacked: \n");
+					for(int p = 0; p < index; p++)
+					{ //player selects target
+						printf("Name: %s | Health: %lf | Input: %d to attack",playerArray[p].name, playerArray[p].lifePoints, p);
+						puts("");
+					}
+						
+					printf("Input: ");
+					scanf("%d",&target);
+
+					target = Players[target];
+					double damage = ((0.5 * players[r].magic) + (0.2 * target.intelligence));
+					target.lifePoints = target.lifePoints - damage;
+					printf("\n\nYou just dealt %lf damage!\n\n",damage);
+
+					for (int i = 0; i < numPlayers; i++)
+					{
+						if(strcmp(players[r].name, players[i].name) != 0)
+						{
+							if((players[i].rowNumber == target.rowNumber) && (players[i].columnNumber == target.columnNumber) && (strcmp(target.name, players[i].name) == 0))
+							{
+								players[i] = target;
+							}
+						}
+					}
+				}
+				
+				if (players[r].lifePoints == 0)
+				{
+					printf("\n\n%s has been killed and has been removed from the game!\n\n",players[r].name);
+				}
+				
+				else if (target.lifePoints == 0)
+				{
+					printf("\n\n%s has been killed and has been removed from the game!\n\n",targetPlayer.name);
+				}
+			
+			}
+			
+			else
+			{
+				printf("\n\nMagic attack is not possible!\n\n");
+			}
+		}
+	}
+	
+	
+	
+}
+
+
 void printfunction(struct Player players3)
 {   printf("%s is ",players3.name);
 	printf("on row %d and column %d\n",(players3.playerposition->row)+1,(players3.playerposition->column)+1);
@@ -908,4 +1187,3 @@ void printfunction(struct Player players3)
 	printf("Your strength points are %d \n",players3.strength);
 	printf("Your luck points are %d \n",players3.luck);
 }
- 
