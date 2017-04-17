@@ -1160,7 +1160,7 @@ void attack (struct Player *players2)
 				
 				else if (target.lifePoints == 0)
 				{
-					printf("\n\n%s has been killed and has been removed from the game!\n\n",targetPlayer.name);
+					printf("\n\n%s has been killed and has been removed from the game!\n\n",target.name);
 				}
 			
 			}
